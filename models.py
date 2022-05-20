@@ -1,7 +1,4 @@
-from turtle import title
-from MySQLdb import DateFromTicks
 from sqlalchemy import Column
-from sqlalchemy import Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy import Table
 from sqlalchemy import Integer
