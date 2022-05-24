@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Table, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 import bcrypt
+import random
+import math
 
 Base = declarative_base()
 
@@ -17,7 +19,7 @@ class User(Base):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.login = self.first_name[:2] + self.last_name[:2] + str(self.user_id)
+        self.login = self.first_name[:3] + self.last_name[:3] + str(math.floor(random.random() * 1000))
         self.create_password()
         
     def create_password(self):
