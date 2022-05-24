@@ -27,6 +27,11 @@ class User(Base):
     def confirm_password(self, password):
         return bcrypt.checkpw(password.encode('utf8'), self.password)
 
+    def change_password(self, new_pass):
+        salt = bcrypt.gensalt()
+        self.password = bcrypt.hashpw(new_pass, salt)
+        return True
+
     groups = relationship('Class_group', backref='users')
 
 class Subject(Base):

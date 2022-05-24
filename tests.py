@@ -16,11 +16,11 @@ class Tests(unittest.TestCase):
         self.session.commit()
 
     def test_add_user(self):
-        new_user = models.User(first_name = 'Alojz', last_name = 'Kokot')
+        new_user = models.User(first_name = 'Alojz', last_name = 'Kokot', email='alko@gmail.com')
         self.session.add(new_user)
         self.session.commit()
-        query = self.session.query(models.User).filter(models.User.first_name == 'Alojz' and models.User.last_name == 'Kokot').all()
-        self.assertEqual(new_user.user_id, query[0].user_id)
+        query = self.session.query(models.User).filter(models.User.first_name == 'Alojz' and models.User.last_name == 'Kokot').first()
+        self.assertEqual(new_user.user_id, query.user_id)
 
 
 if __name__ == '__main__':

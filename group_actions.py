@@ -6,3 +6,6 @@ def assing_person_to_group(user_id, group_id):
     user_query = session.query(User).filter(User.user_id == user_id).first()
     class_query.users.append(user_query)
     session.commit()
+
+def show_all_groups():
+    return session.query(Class_group).all()
