@@ -19,9 +19,14 @@ class Tests(unittest.TestCase):
         self.group1.users.append(self.test_user1)
         self.group1.users.append(self.test_user2)
         self.group1.users[0].is_teacher = True
+        self.session.bulk_save_objects([self.test_user1, self.test_user2, self.group1])
+        self.session.commit()
 
     def tearDown(self):
         self.session.query(models.User).filter(models.User.first_name == 'Alojz' and models.User.last_name == 'Kokot').delete()
+        self.session.query(models.Class_group).filter(models.Class_group.class_id == self.group1.class_id).delete()
+        self.session.query(models.User).filter(models.User.user_id == self.test_user1.user_id).delete()
+        self.session.query(models.User).filter(models.User.user_id == self.test_user2.user_id).delete()
         self.session.commit()
 
     def test_add_user(self):
@@ -31,9 +36,8 @@ class Tests(unittest.TestCase):
         query = self.session.query(models.User).filter(models.User.first_name == 'Alojz' and models.User.last_name == 'Kokot').first()
         self.assertEqual(new_user.user_id, query.user_id)
     
-
     def test_login(self):
-        self.assertTrue(self.test_user1.confirm_password(self.test_user1.login))
+        self.assertTrue(user_actions.user_login(self.test_user1.login, self.test_user1.login))
 
 if __name__ == '__main__':
     unittest.main()

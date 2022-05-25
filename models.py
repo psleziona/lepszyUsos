@@ -25,13 +25,15 @@ class User(Base):
     def create_password(self):
         salt = bcrypt.gensalt()
         self.password = bcrypt.hashpw(self.login.encode('utf8'), salt)
+        self.password = self.password.decode('utf8')
 
     def confirm_password(self, password):
-        return bcrypt.checkpw(password.encode('utf8'), self.password)
+        return bcrypt.checkpw(password.encode('utf8'), self.password.encode('utf8'))
 
     def change_password(self, new_pass):
         salt = bcrypt.gensalt()
-        self.password = bcrypt.hashpw(new_pass, salt)
+        self.password = bcrypt.hashpw(new_pass.encode('utf8'), salt)
+        self.password = self.password.decode('utf8')
         return True
 
 
@@ -48,7 +50,7 @@ class Class_group(Base):
     class_id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     is_teacher = Column(Boolean)
     group_name = Column(String(40), nullable=False)
-    subject = Column(ForeignKey('subject.subject_id'), nullable=False)
-    group_user = Column(ForeignKey('users.user_id'), nullable=False)
+    subject = Column(ForeignKey('subject.subject_id'))
+    group_user = Column(ForeignKey('users.user_id'))
 
     users = relationship('User', backref='groups', uselist=True)
