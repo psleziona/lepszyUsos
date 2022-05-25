@@ -34,20 +34,21 @@ class User(Base):
         self.password = bcrypt.hashpw(new_pass, salt)
         return True
 
-    groups = relationship('Class_group', backref='users')
 
 class Subject(Base):
     __tablename__ = "subject"
     subject_id = Column(Integer, primary_key = True, autoincrement=True, nullable=False)
     name = Column(String(30), nullable=False)
 
-    groups = relationship('Class_group')
+    groups = relationship('Class_group', uselist=True)
 
 
 class Class_group(Base):
     __tablename__ = 'class_group'
     class_id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
-    is_teacher = Column(Boolean, nullable=False)
+    is_teacher = Column(Boolean)
     group_name = Column(String(40), nullable=False)
     subject = Column(ForeignKey('subject.subject_id'), nullable=False)
     group_user = Column(ForeignKey('users.user_id'), nullable=False)
+
+    users = relationship('User', backref='groups', uselist=True)

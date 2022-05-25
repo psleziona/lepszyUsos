@@ -15,3 +15,11 @@ def show_class(user_id, where_teacher=False, where_student=False):
                 res.append(c)
         return res
     return query.groups
+
+
+def user_login(login, password):
+    user = session.query(User).filter(User.login == login).first()
+    if user is not None:
+        if user.confirm_password(password):
+            return True
+    return False
