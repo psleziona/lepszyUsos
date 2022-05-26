@@ -6,6 +6,7 @@ import math
 
 Base = declarative_base()
 
+group_users = Table("group_users", Base.metadata, Column('user_id', ForeignKey('users.user_id')), Column('group_id', ForeignKey('group.group_id', ondelete='CASCADE')))
 
 class User(Base):
     __tablename__ = "users"
@@ -16,6 +17,8 @@ class User(Base):
     login = Column(String(15))
     password = Column(String(200))
     is_admin = Column(Boolean)
+
+    groups = relationship('Group', secondary=group_users)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -42,15 +45,16 @@ class Subject(Base):
     subject_id = Column(Integer, primary_key = True, autoincrement=True, nullable=False)
     name = Column(String(30), nullable=False)
 
-    groups = relationship('Class_group', uselist=True)
+
+class Group(Base):
+    __tablename__ = 'group'
+    group_id = Column(Integer, autoincrement=True, primary_key=True, nullable=False)
+    group_name = Column(String(50), nullable=False)
+    teacher = Column(ForeignKey('users.user_id'))
+    subject_id = Column(ForeignKey('subject.subject_id'))
+    users = relationship('User', secondary=group_users)
+
+    def assign_teacher(self, teacher):
+        self.teacher = teacher.user_id
 
 
-class Class_group(Base):
-    __tablename__ = 'class_group'
-    class_id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
-    is_teacher = Column(Boolean)
-    group_name = Column(String(40), nullable=False)
-    subject = Column(ForeignKey('subject.subject_id'))
-    group_user = Column(ForeignKey('users.user_id'))
-
-    users = relationship('User', backref='groups', uselist=True)

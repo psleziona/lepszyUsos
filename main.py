@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base, User, Subject, Class_group
+from models import Base, User, Subject, Group, group_users
 import csv
 
 def generate_users():
