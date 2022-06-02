@@ -6,14 +6,26 @@ from PyQt6.QtGui import QIcon
 class MainApp(QWidget):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle('LeBszyUSOS')
         self.resize(800, 600)
-        label = QLabel('Jan Kowalski', parent=self)
+        
+        layout = QGridLayout()
+        self.setLayout(layout)
+        
+        label = {}
+        label['User'] = QLabel('Jan Kowalski', parent=self)
+        button_logout = QPushButton('&Log out', clicked=self.logout)
+        layout.addWidget(button_logout)
+        
+    def logout(self):
+        self.LoginWindow = LoginWindow()
+        self.LoginWindow.show()
+        self.close()
 
 class LoginWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('LepszyUSOS login')
-        self.setWindowIcon(QIcon(''))
+        self.setWindowTitle('LeBszyUSOS login')
         self.setFixedSize(400, 200)
 
         layout = QGridLayout()
@@ -24,12 +36,14 @@ class LoginWindow(QWidget):
 
         labels['Email'] = QLabel('Email')
         labels['Password'] = QLabel('Password')
-        labels['Banner'] = QLabel('lepszyUSOS')
+        labels['Banner'] = QLabel('LeBszyUSOS')
         labels['Banner'].setStyleSheet('font-size: 25px;')
         labels['Email'].setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         labels['Password'].setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
         self.lineEdits['Email'] = QLineEdit()
+        self.lineEdits['Email'].setText = "Email"
+        
         self.lineEdits['Password'] = QLineEdit()
         self.lineEdits['Password'].setEchoMode(QLineEdit.EchoMode.Password)
 
@@ -52,9 +66,6 @@ class LoginWindow(QWidget):
         email = self.lineEdits['Email'].text()
         password = self.lineEdits['Password'].text()
         check = user_login(email, password)
-        print(check)
-        print(email)
-        print(password)
         if check:
             self.mainApp = MainApp()
             self.mainApp.show()
