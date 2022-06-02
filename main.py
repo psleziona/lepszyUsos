@@ -17,7 +17,7 @@ def generate_subjects():
         session.add(s)
     session.commit()
 
-engine = create_engine('postgresql://rfvxuilezcmske:09baec9e130d4ea6e9385adf72b4f732972d9b4453aecd5aa6c97294561a9d8a@ec2-52-18-116-67.eu-west-1.compute.amazonaws.com:5432/daa5pddldgnckt', echo=True, future=True)
+engine = create_engine('postgresql://pzgphpclbrjtqg:d7d021ff1705985a500f9ab45b40996fedee5a7f1b6bc051ff36a3fbd27d1d9c@ec2-54-228-125-183.eu-west-1.compute.amazonaws.com:5432/dcnfl455o5meun', echo=True, future=True)
 
 Session = sessionmaker(bind=engine)
 session = Session()
