@@ -1,3 +1,5 @@
+from logging import NullHandler
+from sqlalchemy import and_
 from main import session
 from models import User, Subject, Group
 
@@ -8,7 +10,7 @@ def show_user_class(user_id, where_teacher=False, where_student=False):
         return teach
     if where_student:
         return studs.groups
-    return studes.extends(teach)
+    return studs.extends(teach)
 
 def show_available_classes():
     return session.query(Group).all()
@@ -25,10 +27,16 @@ def sign_to_class(login, group_id):
     user = session.query(User).filter(User.login == login).first()
     group = session.query(Group).filter(Group.group_id == group_id).first()
     if user is not None and group is not None:
-        group.users.append(user)
-        session.commit()
-        return True
+        if Group.teacher == User.login:
+            group.users.append(user)
+            session.commit()
+            return True
     return False
 
-
+def is_admin(user_id):
+    admin = session.query(User).filter(User.user_id == user_id).first()
+    if admin.is_admin == True:
+        return True
+    return False
+    
 
