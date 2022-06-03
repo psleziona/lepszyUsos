@@ -11,7 +11,7 @@ def show_user_class(user_id, where_teacher=False, where_student=False):
     return studes.extends(teach)
 
 def show_available_classes():
-    return session.query(Class_group).all()
+    return session.query(Group).all()
 
 def user_login(login, password):
     user = session.query(User).filter(User.login == login).first()
@@ -21,9 +21,9 @@ def user_login(login, password):
     return False
 
 
-def sign_to_class(login, class_id):
+def sign_to_class(login, group_id):
     user = session.query(User).filter(User.login == login).first()
-    group = session.query(Class_group).filter(Class_group.class_id == class_id).first()
+    group = session.query(Group).filter(Group.group_id == group_id).first()
     if user is not None and group is not None:
         group.users.append(user)
         session.commit()
