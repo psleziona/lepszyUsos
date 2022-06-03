@@ -27,7 +27,7 @@ def sign_to_class(login, group_id):
     user = session.query(User).filter(User.login == login).first()
     group = session.query(Group).filter(Group.group_id == group_id).first()
     if user is not None and group is not None:
-        if Group.teacher == User.login:
+        if Group.teacher != user.user_id:
             group.users.append(user)
             session.commit()
             return True
