@@ -13,12 +13,10 @@ class MainApp(QWidget):
         layout = QGridLayout()
         self.setLayout(layout)
         self.setFixedSize(800, 600)
-
+        self.id = user.user_id
 
         mainV = MainView(user)
-        subjectCreate = createSubject()
-        groupCreate = createGroup()
-
+        
         label1 = QLabel("Widget in Tab 1.")
         label2 = QLabel("Widget in Tab 2.")
 
@@ -27,9 +25,15 @@ class MainApp(QWidget):
         tabWidget.addTab(mainV, "Main")
         tabWidget.addTab(label1, "My classes")
         tabWidget.addTab(label2, "Assign to class")
-        tabWidget.addTab(subjectCreate, "Create class")
-        tabWidget.addTab(groupCreate, "Create group")
+     
+        if is_admin(self.id):
+            subjectCreate = createSubject()
+            groupCreate = createGroup()
 
+            
+            tabWidget.addTab(subjectCreate, "Create class")
+            tabWidget.addTab(groupCreate, "Create group")
+            
         layout.addWidget(tabWidget, 0, 0)
 
 class MainView(QWidget):
