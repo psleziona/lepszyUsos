@@ -1,19 +1,24 @@
 import sys
+from main import session
 from user_actions import user_login
 from PyQt6.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QLabel, QGridLayout, QSizePolicy
 from PyQt6.QtGui import QIcon
+from models import User, Subject, Group
+
 
 class MainApp(QWidget):
-    def __init__(self):
+    def __init__(self, user):
         super().__init__()
         self.setWindowTitle('LeBszyUSOS')
         self.resize(800, 600)
+        self.first_name = user.first_name
+        self.last_name = user.last_name
         
         layout = QGridLayout()
         self.setLayout(layout)
         
         label = {}
-        label['User'] = QLabel('Jan Kowalski', parent=self)
+        label['User'] = QLabel(f'{self.first_name} {self.last_name}', parent=self)
         button_logout = QPushButton('&Log out', clicked=self.logout)
         layout.addWidget(button_logout)
         
@@ -67,7 +72,8 @@ class LoginWindow(QWidget):
         password = self.lineEdits['Password'].text()
         check = user_login(email, password)
         if check:
-            self.mainApp = MainApp()
+            user = session.query(User).filter(User.login == email).first()
+            self.mainApp = MainApp(user)
             self.mainApp.show()
             self.close()
         else:
