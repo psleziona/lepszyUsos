@@ -1,18 +1,21 @@
 import sys
-from user_actions import user_login
+from main import session
+from user_actions import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
+from models import User, Subject, Group
 
 class MainApp(QWidget):
-    def __init__(self):
+    def __init__(self, user):
         super().__init__()
 
         layout = QGridLayout()
         self.setLayout(layout)
         self.setFixedSize(800, 600)
 
-        mainV = MainView()
+
+        mainV = MainView(user)
         subjectCreate = createSubject()
         groupCreate = createGroup()
 
@@ -30,16 +33,18 @@ class MainApp(QWidget):
         layout.addWidget(tabWidget, 0, 0)
 
 class MainView(QWidget):
-    def __init__(self):
+    def __init__(self, user):
         super().__init__()
         self.setWindowTitle('LeBszyUSOS')
         self.resize(800, 600)
+        self.first_name = user.first_name
+        self.last_name = user.last_name
         
         layout = QGridLayout()
         self.setLayout(layout)
         
         label = {}
-        label['User'] = QLabel('Jan Kowalski', parent=self)
+        label['User'] = QLabel(f'{self.first_name} {self.last_name}', parent=self)
         button_logout = QPushButton('&Log out', clicked=self.logout)
         layout.addWidget(button_logout)
         
@@ -93,8 +98,8 @@ class LoginWindow(QWidget):
         password = self.lineEdits['Password'].text()
         check = user_login(email, password)
         if check:
-            #user = session.query(User).filter(User.login == login).first()
-            self.mainApp = MainApp()
+            user = session.query(User).filter(User.login == email).first()
+            self.mainApp = MainApp(user)
             self.mainApp.show()
             self.close()
         else:
@@ -105,10 +110,10 @@ class createSubject(QWidget):
         super().__init__()
         layout = QGridLayout()
         self.setFixedSize(400, 200)
-
+        
         self.label = QLabel("Subject name:")
         self.textInput = QLineEdit()
-
+        
         self.button = QPushButton("&Hit me", clicked=self.createSubject)
 
         layout.addWidget(self.label, 0, 0)
@@ -120,6 +125,9 @@ class createSubject(QWidget):
     def createSubject(self):
         subjectName = self.textInput.text()
         print('\nClicked create new subject ' + subjectName)
+        s = Subject(name=subjectName)
+        session.add(s)
+        session.commit()
 
 class createGroup(QWidget):
     def __init__(self):
@@ -133,16 +141,19 @@ class createGroup(QWidget):
         self.groupName = QLineEdit()
 
         self.teacherId = QComboBox()
-
-        self.teacherId.addItem("Jon")
-        self.teacherId.addItem("Alex")
-        self.teacherId.addItem("Jude")
-
+        users = show_teacher()
+        
+        for user in users:
+            user_full = str(user[0]) + ". " + user[1] + " " + user[2]
+            self.teacherId.addItem(user_full)
+        
         self.subjectId = QComboBox()
-
-        self.subjectId.addItem("English")
-        self.subjectId.addItem("Geometry")
-
+        subjects = show_subjects()
+        
+        for subject in subjects:
+            subject_full = str(subject[0]) + ". " + subject[1]
+            self.subjectId.addItem(subject_full)
+            
         self.button = QPushButton("&Hit me", clicked=self.createSubject)
 
         layout.addWidget(self.groupNameLabel, 0, 0)
@@ -162,7 +173,13 @@ class createGroup(QWidget):
         groupName = self.groupName.text()
         teacherName = str(self.teacherId.currentText())
         subjectName = str(self.subjectId.currentText())
+        
+        teacher_id = int(teacherName.split(".")[0])
+        subjects_id = int(subjectName.split(".")[0])
         print('\nClicked create new group ' + groupName + ' ' + teacherName + ' ' + subjectName)
+        g= Group(group_name=groupName, teacher = teacher_id, subject_id = subjects_id)
+        session.add(g)
+        session.commit()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

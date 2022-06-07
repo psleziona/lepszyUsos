@@ -1,5 +1,7 @@
 from logging import NullHandler
-from sqlalchemy import and_
+from operator import concat
+from select import select
+from sqlalchemy import *
 from main import session
 from models import User, Subject, Group
 
@@ -12,6 +14,12 @@ def show_user_class(user_id, where_teacher=False, where_student=False):
         return studs.groups
     return studs.extends(teach)
 
+def show_teacher():
+    return session.query(User.user_id, User.first_name, User.last_name).all()
+    
+def show_subjects():
+    return session.query(Subject.subject_id, Subject.name).all()
+
 def show_available_classes():
     return session.query(Group).all()
 
@@ -21,7 +29,6 @@ def user_login(login, password):
         if user.confirm_password(password):
             return True
     return False
-
 
 def sign_to_class(login, group_id):
     user = session.query(User).filter(User.login == login).first()
@@ -37,6 +44,4 @@ def is_admin(user_id):
     admin = session.query(User).filter(User.user_id == user_id).first()
     if admin.is_admin == True:
         return True
-    return False
-    
-
+    return False    
