@@ -1,3 +1,4 @@
+from ast import Assign
 import sys
 from main import session
 from user_actions import *
@@ -16,15 +17,14 @@ class MainApp(QWidget):
         self.id = user.user_id
 
         mainV = MainView(user)
-        
-        label1 = QLabel("Widget in Tab 1.")
-        label2 = QLabel("Widget in Tab 2.")
+        assignment_view = assigneToClass(user)
+        my_classes = showMyClass()
 
         tabWidget = QTabWidget()
 
         tabWidget.addTab(mainV, "Main")
-        tabWidget.addTab(label1, "My classes")
-        tabWidget.addTab(label2, "Assign to class")
+        tabWidget.addTab(my_classes, "My classes")
+        tabWidget.addTab(assignment_view, "Assign to class")
      
         if is_admin(self.id):
             subjectCreate = createSubject()
@@ -108,6 +108,59 @@ class LoginWindow(QWidget):
             self.close()
         else:
             self.status.setText('invalid password or email')
+
+class showMyClass(QWidget):
+    def __init__(self):
+        super().__init__()
+        layout = QVBoxLayout()
+        self.button = QPushButton("&unasigned", clicked = self.unasigne)
+        
+        self.list = QListWidget()
+        self.list.insertItem(0, "Dupa")
+        self.list.insertItem(1, "Kurwa")
+        self.list.insertItem(2, "Chuj")
+        self.list.setCurrentRow(0)
+        
+        layout.addWidget(self.button)
+        layout.addWidget(self.list)
+        self.setLayout(layout)
+        
+    def unasigne(self):
+        value = self.list.currentItem()
+        value = value.text()
+        print(value)
+
+class assigneToClass(QWidget):
+    def __init__(self, user):
+        super().__init__()
+        layout = QVBoxLayout()
+        self.button = QPushButton("&asigne", clicked = self.asigne)
+
+        self.list = QListWidget()
+        self.list.setCurrentRow(0)
+        self.id = user.login
+        assign_class = show_available_classes()
+        i=0
+        
+        for group in assign_class:
+            full_name = "Id: " + str(group[0]) + " | Group Name: " + str(group[1]) + " | Subject: " + str(group[2]) + " | Teacher: " + str(group[3]) + " " + str(group[4])
+            self.list.insertItem(i, full_name)
+            i = i + 1            
+                     
+        layout.addWidget(self.button)
+        layout.addWidget(self.list)
+        self.setLayout(layout)
+
+        self.setLayout(layout)
+
+    def asigne(self):
+        value = self.list.currentItem()
+        value = value.text()
+        value = value[4:]
+        value = int(value.split("|")[0])
+        sign_to_class(self.id, value)
+        print(value)
+            
 
 class createSubject(QWidget):
     def __init__(self):

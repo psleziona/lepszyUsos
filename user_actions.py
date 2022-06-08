@@ -21,7 +21,7 @@ def show_subjects():
     return session.query(Subject.subject_id, Subject.name).all()
 
 def show_available_classes():
-    return session.query(Group).all()
+    return session.query(Group.group_id, Group.group_name, Subject.name, User.first_name, User.last_name).join(Subject, Subject.subject_id == Group.subject_id).join(User, Group.teacher == User.user_id).all() 
 
 def user_login(login, password):
     user = session.query(User).filter(User.login == login).first()
