@@ -24,7 +24,8 @@ class User(Base):
         super().__init__(**kwargs)
         self.login = self.first_name[:3] + self.last_name[:3] + str(math.floor(random.random() * 1000))
         self.create_password()
-        
+
+
     def create_password(self):
         salt = bcrypt.gensalt()
         self.password = bcrypt.hashpw(self.login.encode('utf8'), salt)
@@ -53,6 +54,7 @@ class Group(Base):
     teacher = Column(ForeignKey('users.user_id'))
     subject_id = Column(ForeignKey('subject.subject_id'))
     users = relationship('User', secondary=group_users)
+    as_teacher = relationship('User', backref='as_teach', foreign_keys=[teacher])
 
     def assign_teacher(self, teacher):
         self.teacher = teacher.user_id
