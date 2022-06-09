@@ -55,6 +55,7 @@ class Group(Base):
     subject_id = Column(ForeignKey('subject.subject_id'))
     users = relationship('User', secondary=group_users)
     as_teacher = relationship('User', backref='as_teach', foreign_keys=[teacher])
+    subject_name = relationship('Subject')
 
     def assign_teacher(self, teacher):
         self.teacher = teacher.user_id

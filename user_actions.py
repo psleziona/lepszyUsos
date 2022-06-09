@@ -6,13 +6,14 @@ from main import session
 from models import User, Subject, Group
 
 def show_user_class(user_id, where_teacher=False, where_student=False):
-    studs = session.query(User).filter(User.user_id == user_id).first()
+    studs = session.query(User).filter(User.user_id == user_id).all()
     teach = session.query(Group).filter(Group.teacher == user_id).all()
     if where_teacher:
         return teach
     if where_student:
-        return studs.groups
-    return studs.extends(teach)
+        return studs[0].groups
+    studs[0].groups.extend(teach)
+    return studs[0].groups
 
 def show_teacher():
     return session.query(User.user_id, User.first_name, User.last_name).all()

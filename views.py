@@ -8,6 +8,8 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from models import *
 
+
+
 class MainApp(QWidget):
     def __init__(self, user):
         super().__init__()
@@ -18,14 +20,15 @@ class MainApp(QWidget):
         self.id = user.user_id
 
         mainV = MainView(user)
-        assignment_view = assigneToClass(user)
-        my_classes = showMyClass()
+        my_classes = showMyClass(user)
+        assignment_view = assigneToClass(user, my_classes)
 
         tabWidget = QTabWidget()
 
         tabWidget.addTab(mainV, "Main")
         tabWidget.addTab(my_classes, "My classes")
         tabWidget.addTab(assignment_view, "Assign to class")
+     
      
         if is_admin(self.id):
             subjectCreate = createSubject()
@@ -113,47 +116,34 @@ class createUser(QWidget):
         super().__init__()
         layout = QGridLayout()
 
-        labels = {}
+        self.labels = {}
         self.input = {}
 
-        labels['first name'] = QLabel("First name:")
-        labels['last name'] = QLabel("Last name:")
-        labels['Email'] = QLabel("email:")
-        labels['Login'] = QLabel("login:")
-        labels['Password1'] = QLabel("Password:")
-        labels['Password2'] = QLabel("Repeat password:")
-        labels['Admin'] = QLabel("admin:")
+        self.labels['first name'] = QLabel("First name:")
+        self.labels['last name'] = QLabel("Last name:")
+        self.labels['Email'] = QLabel("email:")
+        self.labels['Admin'] = QLabel("admin:")
+        self.labels['Info'] = QLabel("")
 
-        layout.addWidget(labels['first name'], 0, 0)
-        layout.addWidget(labels['last name'], 1, 0)
-        layout.addWidget(labels['Email'], 2, 0)
-        layout.addWidget(labels['Login'], 3, 0)
-        layout.addWidget(labels['Password1'], 4, 0)
-        layout.addWidget(labels['Password2'], 5, 0)
-        layout.addWidget(labels['Admin'], 6, 0)
+        layout.addWidget(self.labels['first name'], 0, 0)
+        layout.addWidget(self.labels['last name'], 1, 0)
+        layout.addWidget(self.labels['Email'], 2, 0)
+        layout.addWidget(self.labels['Admin'], 3, 0)
+        layout.addWidget(self.labels['Info'], 5, 1)
 
         self.input['first name'] = QLineEdit()
         self.input['last name'] = QLineEdit()
         self.input['Email'] = QLineEdit()
-        self.input['Login'] = QLineEdit()
-        self.input['Password1'] = QLineEdit()
-        self.input['Password2'] = QLineEdit()
         self.input['Admin'] = QCheckBox()
-
-        self.input['Password1'].setEchoMode(QLineEdit.EchoMode.Password)
-        self.input['Password2'].setEchoMode(QLineEdit.EchoMode.Password)
 
         layout.addWidget(self.input['first name'], 0, 1)
         layout.addWidget(self.input['last name'], 1, 1)
         layout.addWidget(self.input['Email'], 2, 1)
-        layout.addWidget(self.input['Login'], 3, 1)
-        layout.addWidget(self.input['Password1'], 4, 1)
-        layout.addWidget(self.input['Password2'], 5, 1)
-        layout.addWidget(self.input['Admin'], 6, 1)
+        layout.addWidget(self.input['Admin'], 3, 1)
 
         self.button = QPushButton("&Add user", clicked=self.createUser)
 
-        layout.addWidget(self.button, 7, 1)
+        layout.addWidget(self.button, 4, 1)
 
         self.setLayout(layout)
 
@@ -161,16 +151,13 @@ class createUser(QWidget):
         firstName = str(self.input['first name'].text())
         lastName = str(self.input['last name'].text())
         Email = str(self.input['Email'].text())
-        Login = str(self.input['Login'].text())
-        Password = str(self.input['Password1'].text())
-        Password2 = str(self.input['Password2'].text())
+
         Admin = self.input['Admin'].isChecked()
-        if Password == Password2:
-            new_user = User(first_name = firstName, last_name = lastName, email = Email, login = Login, password = Password, is_admin = Admin)
-            session.add(new_user)
-            session.commit()
- 
-        
+        new_user = User(first_name = firstName, last_name = lastName, email = Email, is_admin = Admin)
+        session.add(new_user)
+        session.commit()
+        self.labels['Info'].setText(f"User has been created. The login is {new_user.login}")
+    
 class LoginWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -224,16 +211,16 @@ class LoginWindow(QWidget):
             self.status.setText('invalid password or email')
 
 class showMyClass(QWidget):
-    def __init__(self):
+
+    def __init__(self, user):
         super().__init__()
         layout = QVBoxLayout()
         self.button = QPushButton("&unasigned", clicked = self.unasigne)
         
         self.list = QListWidget()
-        self.list.insertItem(0, "Dupa")
-        self.list.insertItem(1, "Kurwa")
-        self.list.insertItem(2, "Chuj")
-        self.list.setCurrentRow(0)
+        self.user_classes = show_user_class(user.user_id)
+        self.load_window()
+
         
         layout.addWidget(self.button)
         layout.addWidget(self.list)
@@ -242,24 +229,30 @@ class showMyClass(QWidget):
     def unasigne(self):
         value = self.list.currentItem()
         value = value.text()
-        print(value)
+        self.load_window()
+
+    def load_window(self):
+        self.list.clear()
+        for i,c in enumerate(self.user_classes):
+            self.list.insertItem(i, c.group_name)
+        self.list.setCurrentRow(0)
 
 class assigneToClass(QWidget):
-    def __init__(self, user):
+    def __init__(self, user, tab_all_classes):
         super().__init__()
         layout = QVBoxLayout()
+        self.tab_all_classes = tab_all_classes
+
         self.button = QPushButton("&asigne", clicked = self.asigne)
 
         self.list = QListWidget()
         self.list.setCurrentRow(0)
         self.id = user.login
-        assign_class = show_available_classes()
-        i=0
-        
-        for group in assign_class:
-            full_name = "Id: " + str(group[0]) + " | Group Name: " + str(group[1]) + " | Subject: " + str(group[2]) + " | Teacher: " + str(group[3]) + " " + str(group[4])
-            self.list.insertItem(i, full_name)
-            i = i + 1            
+        assign_class = show_groups_without_user(user.user_id)
+                
+        for i, group in enumerate(assign_class):
+            full_name = f'Id: {group.group_id} | Group name: {group.group_name} | Subject: {group.subject_name.name} | Teacher: {group.as_teacher.first_name} {group.as_teacher.last_name}'
+            self.list.insertItem(i, full_name)     
                      
         layout.addWidget(self.button)
         layout.addWidget(self.list)
@@ -273,7 +266,8 @@ class assigneToClass(QWidget):
         value = value[4:]
         value = int(value.split("|")[0])
         sign_to_class(self.id, value)
-        print(value)
+        self.tab_all_classes.load_window()
+        
             
 
 class createSubject(QWidget):
