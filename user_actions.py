@@ -44,4 +44,12 @@ def is_admin(user_id):
     admin = session.query(User).filter(User.user_id == user_id).first()
     if admin.is_admin == True:
         return True
-    return False    
+    return False   
+
+
+def show_groups_without_user(user_id):
+    groups = session.query(Group).all()
+    usr = session.query(User).filter(User.user_id == user_id).first()
+    if usr is not None:
+        return [group for group in groups if usr not in group.users]
+    return groups
