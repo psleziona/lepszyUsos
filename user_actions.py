@@ -46,10 +46,13 @@ def is_admin(user_id):
         return True
     return False   
 
-
 def show_groups_without_user(user_id):
     groups = session.query(Group).all()
     usr = session.query(User).filter(User.user_id == user_id).first()
     if usr is not None:
         return [group for group in groups if usr not in group.users]
     return groups
+
+def change_password(user, new_password):
+    if user.change_password(new_password):
+        session.commit()
