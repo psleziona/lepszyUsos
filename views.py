@@ -1,11 +1,12 @@
 from ast import Assign
+from pickle import NONE
 import sys
 from main import session
 from user_actions import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
-from models import User, Subject, Group
+from models import *
 
 class MainApp(QWidget):
     def __init__(self, user):
@@ -42,13 +43,16 @@ class MainView(QWidget):
         super().__init__()
         self.setWindowTitle('LeBszyUSOS')
         self.resize(800, 600)
-
+        self.name = user.first_name
+        self.lname = user.last_name
+        self.login = user.login
+        
         hbox = {}
         hbox['Main ribon'] = QHBoxLayout()
         hbox['Change password'] = QGridLayout()
         vbox = QVBoxLayout()
 
-        currentUser = QLabel(f'{self.first_name} {self.last_name}', parent=self)
+        currentUser = QLabel(f'{self.name} {self.lname}', parent=self)
         button_logout = QPushButton('&Log out', clicked=self.logout)
         button_logout.setGeometry(5, 5, 5, 5)
 
@@ -90,12 +94,19 @@ class MainView(QWidget):
         self.setLayout(vbox)
         
     def logout(self):
-        self.LoginWindow = LoginWindow()
-        self.LoginWindow.show()
+        self.mainApp.setParrent(NONE)
+        self.login = LoginWindow()
+        self.login.show()
         self.close()
 
     def changePassword(self):
-        print("change password")
+        current_password = self.currentPasswordInput.text()
+        new_password = self.newPassword1Input.text()
+        new_password2 = self.newPassword2Input.text()
+        if new_password == new_password2:
+            check = user_login(self.login, current_password)
+            if check:
+                User.change_password(self, new_password)
 
 class createUser(QWidget):
     def __init__(self):
@@ -107,7 +118,7 @@ class createUser(QWidget):
 
         labels['first name'] = QLabel("First name:")
         labels['last name'] = QLabel("Last name:")
-        labels['Email'] = QLabel("first name:")
+        labels['Email'] = QLabel("email:")
         labels['Login'] = QLabel("login:")
         labels['Password1'] = QLabel("Password:")
         labels['Password2'] = QLabel("Repeat password:")
@@ -147,8 +158,19 @@ class createUser(QWidget):
         self.setLayout(layout)
 
     def createUser(self):
-        print('\nClicked create new user ')
-
+        firstName = str(self.input['first name'].text())
+        lastName = str(self.input['last name'].text())
+        Email = str(self.input['Email'].text())
+        Login = str(self.input['Login'].text())
+        Password = str(self.input['Password1'].text())
+        Password2 = str(self.input['Password2'].text())
+        Admin = self.input['Admin'].isChecked()
+        if Password == Password2:
+            new_user = User(first_name = firstName, last_name = lastName, email = Email, login = Login, password = Password, is_admin = Admin)
+            session.add(new_user)
+            session.commit()
+ 
+        
 class LoginWindow(QWidget):
     def __init__(self):
         super().__init__()
