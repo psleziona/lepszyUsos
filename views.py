@@ -29,10 +29,11 @@ class MainApp(QWidget):
         if is_admin(self.id):
             subjectCreate = createSubject()
             groupCreate = createGroup()
+            userCreate = createUser()
 
-            
             tabWidget.addTab(subjectCreate, "Create class")
             tabWidget.addTab(groupCreate, "Create group")
+            tabWidget.addTab(userCreate, "Create user")
             
         layout.addWidget(tabWidget, 0, 0)
 
@@ -41,21 +42,112 @@ class MainView(QWidget):
         super().__init__()
         self.setWindowTitle('LeBszyUSOS')
         self.resize(800, 600)
-        self.first_name = user.first_name
-        self.last_name = user.last_name
-        
-        layout = QGridLayout()
-        self.setLayout(layout)
-        
-        label = {}
-        label['User'] = QLabel(f'{self.first_name} {self.last_name}', parent=self)
+
+        hbox = {}
+        hbox['Main ribon'] = QHBoxLayout()
+        hbox['Change password'] = QGridLayout()
+        vbox = QVBoxLayout()
+
+        currentUser = QLabel(f'{self.first_name} {self.last_name}', parent=self)
         button_logout = QPushButton('&Log out', clicked=self.logout)
-        layout.addWidget(button_logout)
+        button_logout.setGeometry(5, 5, 5, 5)
+
+        hbox['Main ribon'].addWidget(currentUser)
+        hbox['Main ribon'].addWidget(button_logout)
+
+        changePasswordLabel = QLabel("Change password:")
+        currentPasswordLabel = QLabel("Current password:")
+        newPasswordLabel1 = QLabel("new password:")
+        newPasswordLabel2 = QLabel("repeat password:")
+
+        self.currentPasswordInput = QLineEdit()
+        self.currentPasswordInput.setEchoMode(QLineEdit.EchoMode.Password)
+
+        self.newPassword1Input = QLineEdit()
+        self.newPassword1Input.setEchoMode(QLineEdit.EchoMode.Password)
+
+        self.newPassword2Input = QLineEdit()
+        self.newPassword2Input.setEchoMode(QLineEdit.EchoMode.Password)
+
+        self.button = QPushButton("&Change password", clicked=self.changePassword)
+
+        hbox['Change password'].addWidget(changePasswordLabel, 0, 0)
+        hbox['Change password'].addWidget(currentPasswordLabel, 1, 0)
+        hbox['Change password'].addWidget(newPasswordLabel1, 2, 0)
+        hbox['Change password'].addWidget(newPasswordLabel2, 3, 0)
+
+        hbox['Change password'].addWidget(self.currentPasswordInput, 1, 1)
+        hbox['Change password'].addWidget(self.newPassword1Input, 2, 1)
+        hbox['Change password'].addWidget(self.newPassword2Input, 3, 1)
+
+        hbox['Change password'].addWidget(self.button, 4, 1)
+
+        vbox.addLayout(hbox['Main ribon'])
+        vbox.addLayout((hbox['Change password']))
+
+        vbox.addWidget(currentUser)
+
+        self.setLayout(vbox)
         
     def logout(self):
         self.LoginWindow = LoginWindow()
         self.LoginWindow.show()
         self.close()
+
+    def changePassword(self):
+        print("change password")
+
+class createUser(QWidget):
+    def __init__(self):
+        super().__init__()
+        layout = QGridLayout()
+
+        labels = {}
+        self.input = {}
+
+        labels['first name'] = QLabel("First name:")
+        labels['last name'] = QLabel("Last name:")
+        labels['Email'] = QLabel("first name:")
+        labels['Login'] = QLabel("login:")
+        labels['Password1'] = QLabel("Password:")
+        labels['Password2'] = QLabel("Repeat password:")
+        labels['Admin'] = QLabel("admin:")
+
+        layout.addWidget(labels['first name'], 0, 0)
+        layout.addWidget(labels['last name'], 1, 0)
+        layout.addWidget(labels['Email'], 2, 0)
+        layout.addWidget(labels['Login'], 3, 0)
+        layout.addWidget(labels['Password1'], 4, 0)
+        layout.addWidget(labels['Password2'], 5, 0)
+        layout.addWidget(labels['Admin'], 6, 0)
+
+        self.input['first name'] = QLineEdit()
+        self.input['last name'] = QLineEdit()
+        self.input['Email'] = QLineEdit()
+        self.input['Login'] = QLineEdit()
+        self.input['Password1'] = QLineEdit()
+        self.input['Password2'] = QLineEdit()
+        self.input['Admin'] = QCheckBox()
+
+        self.input['Password1'].setEchoMode(QLineEdit.EchoMode.Password)
+        self.input['Password2'].setEchoMode(QLineEdit.EchoMode.Password)
+
+        layout.addWidget(self.input['first name'], 0, 1)
+        layout.addWidget(self.input['last name'], 1, 1)
+        layout.addWidget(self.input['Email'], 2, 1)
+        layout.addWidget(self.input['Login'], 3, 1)
+        layout.addWidget(self.input['Password1'], 4, 1)
+        layout.addWidget(self.input['Password2'], 5, 1)
+        layout.addWidget(self.input['Admin'], 6, 1)
+
+        self.button = QPushButton("&Add user", clicked=self.createUser)
+
+        layout.addWidget(self.button, 7, 1)
+
+        self.setLayout(layout)
+
+    def createUser(self):
+        print('\nClicked create new user ')
 
 class LoginWindow(QWidget):
     def __init__(self):
