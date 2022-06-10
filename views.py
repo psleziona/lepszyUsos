@@ -57,6 +57,9 @@ class MainView(QWidget):
         super().__init__()
         self.setWindowTitle('LeBszyUSOS')
         self.resize(800, 600)
+        
+        self.user = user
+        
         self.name = user.first_name
         self.lname = user.last_name
         self.login = user.login
@@ -120,7 +123,7 @@ class MainView(QWidget):
         if new_password == new_password2:
             check = user_login(self.login, current_password)
             if check:
-                User.change_password(self, new_password)
+                change_password(self.user, new_password)
 
 class createUser(QWidget):
     def __init__(self):
