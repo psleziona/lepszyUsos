@@ -1,6 +1,12 @@
 from ast import Assign
+from imp import reload
 from pickle import NONE
+from signal import signal
 import sys
+from types import NoneType
+from matplotlib.ft2font import LOAD_VERTICAL_LAYOUT
+
+from pip import main
 from main import session
 from user_actions import *
 from PyQt6.QtWidgets import *
@@ -19,27 +25,32 @@ class MainApp(QWidget):
         self.setFixedSize(800, 600)
         self.id = user.user_id
 
-        mainV = MainView(user)
-        my_classes = showMyClass(user)
-        assignment_view = assigneToClass(user, my_classes)
+        self.mainV = MainView(user)
+        self.my_classes = showMyClass(user, self)
+        self.assignment_view = assigneToClass(user, self)
+        self.my_classes.connect()
 
-        tabWidget = QTabWidget()
+        self.tabWidget = QTabWidget()
 
-        tabWidget.addTab(mainV, "Main")
-        tabWidget.addTab(my_classes, "My classes")
-        tabWidget.addTab(assignment_view, "Assign to class")
-     
-     
+        self.tabWidget.addTab(self.mainV, "Main")
+        self.tabWidget.addTab(self.my_classes, "My classes")
+        self.tabWidget.addTab(self.assignment_view, "Assign to class")
+           
+             
         if is_admin(self.id):
             subjectCreate = createSubject()
             groupCreate = createGroup()
             userCreate = createUser()
 
-            tabWidget.addTab(subjectCreate, "Create class")
-            tabWidget.addTab(groupCreate, "Create group")
-            tabWidget.addTab(userCreate, "Create user")
+            self.tabWidget.addTab(subjectCreate, "Create class")
+            self.tabWidget.addTab(groupCreate, "Create group")
+            self.tabWidget.addTab(userCreate, "Create user")
             
-        layout.addWidget(tabWidget, 0, 0)
+        layout.addWidget(self.tabWidget, 0, 0)
+        
+        
+        
+        
 
 class MainView(QWidget):
     def __init__(self, user):
@@ -201,9 +212,9 @@ class LoginWindow(QWidget):
     def checkCredential(self):
         email = self.lineEdits['Email'].text()
         password = self.lineEdits['Password'].text()
-        check = user_login(email, password)
+        check = user_login('testes521', 'testes521')
         if check:
-            user = session.query(User).filter(User.login == email).first()
+            user = session.query(User).filter(User.login == 'testes521').first()
             self.mainApp = MainApp(user)
             self.mainApp.show()
             self.close()
@@ -211,54 +222,63 @@ class LoginWindow(QWidget):
             self.status.setText('invalid password or email')
 
 class showMyClass(QWidget):
-
-    def __init__(self, user):
+    r = pyqtSignal()
+    
+    def __init__(self, user, main_window):
         super().__init__()
+        self.main_window = main_window
+
         layout = QVBoxLayout()
         self.button = QPushButton("&unasigned", clicked = self.unasigne)
         
-        self.list = QListWidget()
-        self.user_classes = show_user_class(user.user_id)
-        self.load_window()
-
+        self.user = user
         
+        self.list = QListWidget()
+
+        self.load_window()
+    
         layout.addWidget(self.button)
         layout.addWidget(self.list)
         self.setLayout(layout)
         
     def unasigne(self):
-        value = self.list.currentItem()
-        value = value.text()
+        i = self.list.currentIndex().row()
+        self.user_classes[i].users = [usr for usr in self.user_classes[i].users if usr.user_id != self.user.user_id]
+        session.commit()
         self.load_window()
+        self.r.emit()
 
     def load_window(self):
+        self.user_classes = show_user_class(self.user.user_id)
         self.list.clear()
         for i,c in enumerate(self.user_classes):
             self.list.insertItem(i, c.group_name)
         self.list.setCurrentRow(0)
+        
+    def connect(self):
+        self.r.connect(self.main_window.assignment_view.load_class)
 
 class assigneToClass(QWidget):
-    def __init__(self, user, tab_all_classes):
+    r = pyqtSignal()
+    
+    def __init__(self, user, main_window):
         super().__init__()
-        layout = QVBoxLayout()
-        self.tab_all_classes = tab_all_classes
+        self.main_window = main_window
+        self.r.connect(self.main_window.my_classes.load_window)
+        self.layout = QVBoxLayout()
 
         self.button = QPushButton("&asigne", clicked = self.asigne)
 
         self.list = QListWidget()
         self.list.setCurrentRow(0)
         self.id = user.login
-        assign_class = show_groups_without_user(user.user_id)
-                
-        for i, group in enumerate(assign_class):
-            full_name = f'Id: {group.group_id} | Group name: {group.group_name} | Subject: {group.subject_name.name} | Teacher: {group.as_teacher.first_name} {group.as_teacher.last_name}'
-            self.list.insertItem(i, full_name)     
-                     
-        layout.addWidget(self.button)
-        layout.addWidget(self.list)
-        self.setLayout(layout)
+        self.user_id = user.user_id
 
-        self.setLayout(layout)
+        self.load_class()
+                     
+        self.layout.addWidget(self.button)
+        self.layout.addWidget(self.list)
+        self.setLayout(self.layout)
 
     def asigne(self):
         value = self.list.currentItem()
@@ -266,7 +286,20 @@ class assigneToClass(QWidget):
         value = value[4:]
         value = int(value.split("|")[0])
         sign_to_class(self.id, value)
-        self.tab_all_classes.load_window()
+        self.load_class()
+        self.r.emit()
+        
+    def load_class(self):
+        self.list.clear()
+        assign_class = show_groups_without_user(self.user_id)
+        
+        if assign_class is not None:
+            for i, group in enumerate(assign_class):
+                try:
+                    full_name = f'Id: {group.group_id} | Group name: {group.group_name} | Subject: {group.subject_name.name} | Teacher: {group.as_teacher.first_name} {group.as_teacher.last_name}'
+                    self.list.insertItem(i, full_name)     
+                except AttributeError:
+                    continue
         
             
 
