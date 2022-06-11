@@ -64,8 +64,8 @@ class MainView(QWidget):
 
         changePasswordLabel = QLabel("Change password:")
         currentPasswordLabel = QLabel("Current password:")
-        newPasswordLabel1 = QLabel("new password:")
-        newPasswordLabel2 = QLabel("repeat password:")
+        newPasswordLabel1 = QLabel("New password:")
+        newPasswordLabel2 = QLabel("Repeat password:")
 
         self.currentPasswordInput = QLineEdit()
         self.currentPasswordInput.setEchoMode(QLineEdit.EchoMode.Password)
@@ -208,14 +208,14 @@ class LoginWindow(QWidget):
             self.mainApp.show()
             self.close()
         else:
-            self.status.setText('invalid password or email')
+            self.status.setText('Invalid password or email')
 
 class showMyClass(QWidget):
 
     def __init__(self, user):
         super().__init__()
         layout = QVBoxLayout()
-        self.button = QPushButton("&unasigned", clicked = self.unasigne)
+        self.button = QPushButton("&Unassigned", clicked = self.unasigne)
         
         self.list = QListWidget()
         self.user_classes = show_user_class(user.user_id)
@@ -243,7 +243,7 @@ class assigneToClass(QWidget):
         layout = QVBoxLayout()
         self.tab_all_classes = tab_all_classes
 
-        self.button = QPushButton("&asigne", clicked = self.asigne)
+        self.button = QPushButton("&Assigne", clicked = self.asigne)
 
         self.list = QListWidget()
         self.list.setCurrentRow(0)
